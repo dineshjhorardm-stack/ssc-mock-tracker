@@ -1,1 +1,157 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSC Mock Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-3xl shadow-lg p-6 mb-6">
+      <h1 class="text-4xl font-bold">SSC Mock Tracker 🚀</h1>
+      <p class="text-gray-600 mt-2">Track SSC CGL / CHSL / CPO Mock Scores Easily</p>
+    </div><div class="bg-white rounded-3xl shadow-lg p-6 mb-6">
+  <h2 class="text-2xl font-bold mb-4">Add New Mock</h2>
 
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+    <input id="date" type="date" class="border rounded-xl p-3" />
+    <input id="test" type="text" placeholder="Test Name" class="border rounded-xl p-3" />
+    <input id="score" type="number" placeholder="Total Score" class="border rounded-xl p-3" />
+    <input id="maths" type="number" placeholder="Maths" class="border rounded-xl p-3" />
+    <input id="reasoning" type="number" placeholder="Reasoning" class="border rounded-xl p-3" />
+    <input id="english" type="number" placeholder="English" class="border rounded-xl p-3" />
+    <input id="gk" type="number" placeholder="GK" class="border rounded-xl p-3" />
+    <input id="positive" type="number" placeholder="Positive" class="border rounded-xl p-3" />
+    <input id="negative" type="number" placeholder="Negative" class="border rounded-xl p-3" />
+    <input id="percentile" type="number" placeholder="Percentile" class="border rounded-xl p-3" />
+    <input id="target" type="number" placeholder="Target Score" class="border rounded-xl p-3" />
+
+    <button onclick="addMock()" class="bg-black text-white rounded-xl p-3 font-semibold">
+      Add Mock
+    </button>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-2xl p-5 shadow-md">
+    <h2 class="text-lg font-semibold">Average Score</h2>
+    <p id="avg" class="text-3xl font-bold mt-2">0</p>
+  </div>
+
+  <div class="bg-white rounded-2xl p-5 shadow-md">
+    <h2 class="text-lg font-semibold">Highest Score</h2>
+    <p id="highest" class="text-3xl font-bold mt-2">0</p>
+  </div>
+
+  <div class="bg-white rounded-2xl p-5 shadow-md">
+    <h2 class="text-lg font-semibold">Mocks Attempted</h2>
+    <p id="count" class="text-3xl font-bold mt-2">0</p>
+  </div>
+</div>
+
+<div class="bg-white rounded-3xl shadow-lg p-6 overflow-x-auto">
+  <h2 class="text-2xl font-bold mb-4">Mock History</h2>
+
+  <table class="w-full border-collapse">
+    <thead>
+      <tr class="bg-gray-200 text-left">
+        <th class="p-3">Date</th>
+        <th class="p-3">Test</th>
+        <th class="p-3">Score</th>
+        <th class="p-3">Maths</th>
+        <th class="p-3">Reasoning</th>
+        <th class="p-3">English</th>
+        <th class="p-3">GK</th>
+        <th class="p-3">Positive</th>
+        <th class="p-3">Negative</th>
+        <th class="p-3">Percentile</th>
+        <th class="p-3">Target</th>
+        <th class="p-3">Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+  </div>  <script>
+    let mocks = JSON.parse(localStorage.getItem('sscMocks')) || [];
+
+    function saveData() {
+      localStorage.setItem('sscMocks', JSON.stringify(mocks));
+    }
+
+    function updateStats() {
+      document.getElementById('count').innerText = mocks.length;
+
+      if (mocks.length === 0) {
+        document.getElementById('avg').innerText = 0;
+        document.getElementById('highest').innerText = 0;
+        return;
+      }
+
+      let total = mocks.reduce((a, b) => a + b.score, 0);
+      let avg = (total / mocks.length).toFixed(2);
+      let highest = Math.max(...mocks.map(m => m.score));
+
+      document.getElementById('avg').innerText = avg;
+      document.getElementById('highest').innerText = highest;
+    }
+
+    function renderTable() {
+      const table = document.getElementById('tableBody');
+      table.innerHTML = '';
+
+      mocks.forEach(mock => {
+        table.innerHTML += `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3">${mock.date}</td>
+            <td class="p-3">${mock.test}</td>
+            <td class="p-3 font-bold">${mock.score}</td>
+            <td class="p-3">${mock.maths}</td>
+            <td class="p-3">${mock.reasoning}</td>
+            <td class="p-3">${mock.english}</td>
+            <td class="p-3">${mock.gk}</td>
+            <td class="p-3">${mock.positive}</td>
+            <td class="p-3">${mock.negative}</td>
+            <td class="p-3">${mock.percentile}</td>
+            <td class="p-3">${mock.target}</td>
+            <td class="p-3"><button onclick="deleteMock(${index})" class="bg-red-500 text-white px-3 py-1 rounded-lg">Delete</button></td>
+          </tr>
+        `;
+      });
+
+      updateStats();
+    }
+
+    function addMock() {
+      const mock = {
+        date: document.getElementById('date').value,
+        test: document.getElementById('test').value,
+        score: Number(document.getElementById('score').value),
+        maths: Number(document.getElementById('maths').value),
+        reasoning: Number(document.getElementById('reasoning').value),
+        english: Number(document.getElementById('english').value),
+        gk: Number(document.getElementById('gk').value),
+        positive: Number(document.getElementById('positive').value),
+        negative: Number(document.getElementById('negative').value),
+        percentile: Number(document.getElementById('percentile').value),
+        target: Number(document.getElementById('target').value)
+      };
+
+      mocks.unshift(mock);
+      saveData();
+      function deleteMock(index) {
+      mocks.splice(index, 1);
+      saveData();
+      renderTable();
+    }
+
+    renderTable();
+
+      document.querySelectorAll('input').forEach(input => input.value = '');
+    }
+
+    renderTable();
+  </script></body>
+  </html>
