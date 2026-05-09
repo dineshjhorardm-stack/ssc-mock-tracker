@@ -1,157 +1,203 @@
-<!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SSC Mock Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen p-4">
-  <div class="max-w-6xl mx-auto">
-    <div class="bg-white rounded-3xl shadow-lg p-6 mb-6">
-      <h1 class="text-4xl font-bold">SSC Mock Tracker 🚀</h1>
-      <p class="text-gray-600 mt-2">Track SSC CGL / CHSL / CPO Mock Scores Easily</p>
-    </div><div class="bg-white rounded-3xl shadow-lg p-6 mb-6">
-  <h2 class="text-2xl font-bold mb-4">Add New Mock</h2>
+import React, { useEffect, useState } from "react";
 
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-    <input id="date" type="date" class="border rounded-xl p-3" />
-    <input id="test" type="text" placeholder="Test Name" class="border rounded-xl p-3" />
-    <input id="score" type="number" placeholder="Total Score" class="border rounded-xl p-3" />
-    <input id="maths" type="number" placeholder="Maths" class="border rounded-xl p-3" />
-    <input id="reasoning" type="number" placeholder="Reasoning" class="border rounded-xl p-3" />
-    <input id="english" type="number" placeholder="English" class="border rounded-xl p-3" />
-    <input id="gk" type="number" placeholder="GK" class="border rounded-xl p-3" />
-    <input id="positive" type="number" placeholder="Positive" class="border rounded-xl p-3" />
-    <input id="negative" type="number" placeholder="Negative" class="border rounded-xl p-3" />
-    <input id="percentile" type="number" placeholder="Percentile" class="border rounded-xl p-3" />
-    <input id="target" type="number" placeholder="Target Score" class="border rounded-xl p-3" />
+export default function SSCMockTracker() { const [mocks, setMocks] = useState(() => { const saved = localStorage.getItem("ssc-mock-data"); return saved ? JSON.parse(saved) : []; });
 
-    <button onclick="addMock()" class="bg-black text-white rounded-xl p-3 font-semibold">
-      Add Mock
-    </button>
-  </div>
-</div>
+const [form, setForm] = useState({ date: "", exam: "CGL", test: "", maths: "", reasoning: "", english: "", gk: "", positive: "", negative: "", percentile: "", target: "140", });
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-  <div class="bg-white rounded-2xl p-5 shadow-md">
-    <h2 class="text-lg font-semibold">Average Score</h2>
-    <p id="avg" class="text-3xl font-bold mt-2">0</p>
-  </div>
+useEffect(() => { localStorage.setItem("ssc-mock-data", JSON.stringify(mocks)); }, [mocks]);
 
-  <div class="bg-white rounded-2xl p-5 shadow-md">
-    <h2 class="text-lg font-semibold">Highest Score</h2>
-    <p id="highest" class="text-3xl font-bold mt-2">0</p>
-  </div>
+const total = Number(form.maths || 0) + Number(form.reasoning || 0) + Number(form.english || 0) + Number(form.gk || 0);
 
-  <div class="bg-white rounded-2xl p-5 shadow-md">
-    <h2 class="text-lg font-semibold">Mocks Attempted</h2>
-    <p id="count" class="text-3xl font-bold mt-2">0</p>
-  </div>
-</div>
+const addMock = () => { const newMock = { ...form, total, id: Date.now(), };
 
-<div class="bg-white rounded-3xl shadow-lg p-6 overflow-x-auto">
-  <h2 class="text-2xl font-bold mb-4">Mock History</h2>
+setMocks([newMock, ...mocks]);
 
-  <table class="w-full border-collapse">
-    <thead>
-      <tr class="bg-gray-200 text-left">
-        <th class="p-3">Date</th>
-        <th class="p-3">Test</th>
-        <th class="p-3">Score</th>
-        <th class="p-3">Maths</th>
-        <th class="p-3">Reasoning</th>
-        <th class="p-3">English</th>
-        <th class="p-3">GK</th>
-        <th class="p-3">Positive</th>
-        <th class="p-3">Negative</th>
-        <th class="p-3">Percentile</th>
-        <th class="p-3">Target</th>
-        <th class="p-3">Action</th>
-      </tr>
-    </thead>
+setForm({
+  date: "",
+  exam: "CGL",
+  test: "",
+  maths: "",
+  reasoning: "",
+  english: "",
+  gk: "",
+  positive: "",
+  negative: "",
+  percentile: "",
+  target: "140",
+});
 
-    <tbody id="tableBody"></tbody>
-  </table>
-</div>
+};
 
-  </div>  <script>
-    let mocks = JSON.parse(localStorage.getItem('sscMocks')) || [];
+const deleteMock = (id) => { setMocks(mocks.filter((m) => m.id !== id)); };
 
-    function saveData() {
-      localStorage.setItem('sscMocks', JSON.stringify(mocks));
-    }
+const average = mocks.length ? ( mocks.reduce((a, b) => a + b.total, 0) / mocks.length ).toFixed(2) : 0;
 
-    function updateStats() {
-      document.getElementById('count').innerText = mocks.length;
+const highest = mocks.length ? Math.max(...mocks.map((m) => m.total)) : 0;
 
-      if (mocks.length === 0) {
-        document.getElementById('avg').innerText = 0;
-        document.getElementById('highest').innerText = 0;
-        return;
-      }
+return ( <div className="min-h-screen bg-gray-100 p-4 md:p-6"> <div className="max-w-7xl mx-auto"> <div className="bg-white rounded-3xl shadow-xl p-6 mb-6"> <h1 className="text-4xl font-bold mb-2"> SSC Mock Tracker 🚀 </h1> <p className="text-gray-600"> Track SSC CGL / CHSL / CPO Performance Easily </p> </div>
 
-      let total = mocks.reduce((a, b) => a + b.score, 0);
-      let avg = (total / mocks.length).toFixed(2);
-      let highest = Math.max(...mocks.map(m => m.score));
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="bg-white rounded-2xl p-5 shadow-md">
+        <h2 className="text-lg font-semibold">Average Score</h2>
+        <p className="text-3xl font-bold mt-2">{average}</p>
+      </div>
 
-      document.getElementById('avg').innerText = avg;
-      document.getElementById('highest').innerText = highest;
-    }
+      <div className="bg-white rounded-2xl p-5 shadow-md">
+        <h2 className="text-lg font-semibold">Highest Score</h2>
+        <p className="text-3xl font-bold mt-2">{highest}</p>
+      </div>
 
-    function renderTable() {
-      const table = document.getElementById('tableBody');
-      table.innerHTML = '';
+      <div className="bg-white rounded-2xl p-5 shadow-md">
+        <h2 className="text-lg font-semibold">Mocks Attempted</h2>
+        <p className="text-3xl font-bold mt-2">{mocks.length}</p>
+      </div>
+    </div>
 
-      mocks.forEach(mock => {
-        table.innerHTML += `
-          <tr class="border-b hover:bg-gray-50">
-            <td class="p-3">${mock.date}</td>
-            <td class="p-3">${mock.test}</td>
-            <td class="p-3 font-bold">${mock.score}</td>
-            <td class="p-3">${mock.maths}</td>
-            <td class="p-3">${mock.reasoning}</td>
-            <td class="p-3">${mock.english}</td>
-            <td class="p-3">${mock.gk}</td>
-            <td class="p-3">${mock.positive}</td>
-            <td class="p-3">${mock.negative}</td>
-            <td class="p-3">${mock.percentile}</td>
-            <td class="p-3">${mock.target}</td>
-            <td class="p-3"><button onclick="deleteMock(${index})" class="bg-red-500 text-white px-3 py-1 rounded-lg">Delete</button></td>
+    <div className="bg-white rounded-3xl shadow-xl p-6 mb-6">
+      <h2 className="text-2xl font-bold mb-4">Add New Mock</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <input
+          type="date"
+          value={form.date}
+          onChange={(e) => setForm({ ...form, date: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <select
+          value={form.exam}
+          onChange={(e) => setForm({ ...form, exam: e.target.value })}
+          className="border rounded-xl p-3"
+        >
+          <option>CGL</option>
+          <option>CHSL</option>
+          <option>CPO</option>
+        </select>
+
+        <input
+          type="text"
+          placeholder="Test Name"
+          value={form.test}
+          onChange={(e) => setForm({ ...form, test: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <input
+          type="number"
+          placeholder="Maths"
+          value={form.maths}
+          onChange={(e) => setForm({ ...form, maths: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <input
+          type="number"
+          placeholder="Reasoning"
+          value={form.reasoning}
+          onChange={(e) => setForm({ ...form, reasoning: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <input
+          type="number"
+          placeholder="English"
+          value={form.english}
+          onChange={(e) => setForm({ ...form, english: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <input
+          type="number"
+          placeholder="GK"
+          value={form.gk}
+          onChange={(e) => setForm({ ...form, gk: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <input
+          type="number"
+          placeholder="Positive Marks"
+          value={form.positive}
+          onChange={(e) => setForm({ ...form, positive: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <input
+          type="number"
+          placeholder="Negative Marks"
+          value={form.negative}
+          onChange={(e) => setForm({ ...form, negative: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <input
+          type="number"
+          placeholder="Percentile"
+          value={form.percentile}
+          onChange={(e) => setForm({ ...form, percentile: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <input
+          type="number"
+          placeholder="Target Score"
+          value={form.target}
+          onChange={(e) => setForm({ ...form, target: e.target.value })}
+          className="border rounded-xl p-3"
+        />
+
+        <div className="bg-black text-white rounded-xl p-3 flex items-center justify-center font-bold">
+          Total: {total}
+        </div>
+      </div>
+
+      <button
+        onClick={addMock}
+        className="mt-4 bg-black text-white rounded-xl px-6 py-3 font-semibold"
+      >
+        Add Mock
+      </button>
+    </div>
+
+    <div className="bg-white rounded-3xl shadow-xl p-6 overflow-x-auto">
+      <h2 className="text-2xl font-bold mb-4">Mock History</h2>
+
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="bg-gray-200 text-left">
+            <th className="p-3">Date</th>
+            <th className="p-3">Exam</th>
+            <th className="p-3">Test</th>
+            <th className="p-3">Total</th>
+            <th className="p-3">Percentile</th>
+            <th className="p-3">Target</th>
+            <th className="p-3">Action</th>
           </tr>
-        `;
-      });
+        </thead>
 
-      updateStats();
-    }
+        <tbody>
+          {mocks.map((mock) => (
+            <tr key={mock.id} className="border-b hover:bg-gray-50">
+              <td className="p-3">{mock.date}</td>
+              <td className="p-3">{mock.exam}</td>
+              <td className="p-3">{mock.test}</td>
+              <td className="p-3 font-bold">{mock.total}</td>
+              <td className="p-3">{mock.percentile}</td>
+              <td className="p-3">{mock.target}</td>
+              <td className="p-3">
+                <button
+                  onClick={() => deleteMock(mock.id)}
+                  className="bg-red-500 text-white px-4 py-2 rounded-xl"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-    function addMock() {
-      const mock = {
-        date: document.getElementById('date').value,
-        test: document.getElementById('test').value,
-        score: Number(document.getElementById('score').value),
-        maths: Number(document.getElementById('maths').value),
-        reasoning: Number(document.getElementById('reasoning').value),
-        english: Number(document.getElementById('english').value),
-        gk: Number(document.getElementById('gk').value),
-        positive: Number(document.getElementById('positive').value),
-        negative: Number(document.getElementById('negative').value),
-        percentile: Number(document.getElementById('percentile').value),
-        target: Number(document.getElementById('target').value)
-      };
-
-      mocks.unshift(mock);
-      saveData();
-      function deleteMock(index) {
-      mocks.splice(index, 1);
-      saveData();
-      renderTable();
-    }
-
-    renderTable();
-
-      document.querySelectorAll('input').forEach(input => input.value = '');
-    }
-
-    renderTable();
-  </script></body>
-  </html>
+); }
